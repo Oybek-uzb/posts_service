@@ -22,11 +22,14 @@ func main() {
 		fmt.Println(fmt.Errorf("%s", err))
 	}
 
-	repository := postsPostgres.NewRepository(postgreSQLClient)
+	pgRepository := postsPostgres.NewRepository(postgreSQLClient)
 
 	s := grpc.NewServer()
-	postsService := services.NewPostsService(repository)
+	postsService := services.NewPostsService(pgRepository)
 	pbp.RegisterPostsServiceServer(s, postsService)
+
+	remotePostsService := services.NewRemotePostsService(pgRepository)
+	pbp.RegisterRemotePostsServiceServer(s, remotePostsService)
 
 	listen, err := net.Listen("tcp", cfg.HttpPort)
 	if err != nil {

@@ -17,7 +17,7 @@ type Config struct {
 
 type StorageConfig struct {
 	Host     string `json:"host" env-default:"localhost"`
-	Port     string `json:"port" env-default:"27817"`
+	Port     string `json:"port" env-default:"5432"`
 	Database string `json:"database" env-default:"posts-service"`
 	Username string `json:"username" env-default:"postgres"`
 	Password string `json:"password" env-default:"postgres"`

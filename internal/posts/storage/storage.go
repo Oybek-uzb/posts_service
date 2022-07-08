@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, author *model.Post) error
+	Create(ctx context.Context, post *model.Post) error
 	FindAll(ctx context.Context) ([]*model.Post, error)
 	FindOne(ctx context.Context, id int32) (*model.Post, error)
 	Update(ctx context.Context, post model.Post) (*model.Post, error)
