@@ -44,7 +44,14 @@ func (r *repository) FindAll(ctx context.Context) ([]*model.Post, error) {
 	}
 
 	rows, err := r.client.Query(ctx, sql, i...)
+
+	var pgErr *pgconn.PgError
 	if err != nil {
+		if errors.Is(err, pgErr) {
+			pgErr = err.(*pgconn.PgError)
+			sqlErr := fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
+			return nil, sqlErr
+		}
 		return nil, err
 	}
 
@@ -55,15 +62,27 @@ func (r *repository) FindAll(ctx context.Context) ([]*model.Post, error) {
 
 		err = rows.Scan(&ps.Id, &ps.UserId, &ps.Title, &ps.Body)
 		if err != nil {
+			if errors.Is(err, pgErr) {
+				pgErr = err.(*pgconn.PgError)
+				sqlErr := fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
+				return nil, sqlErr
+			}
 			return nil, err
 		}
+
 		posts = append(posts, &ps)
 	}
 
 	err = rows.Err()
 	if err != nil {
+		if errors.Is(err, pgErr) {
+			pgErr = err.(*pgconn.PgError)
+			sqlErr := fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
+			return nil, sqlErr
+		}
 		return nil, err
 	}
+
 	return posts, nil
 }
 
@@ -74,7 +93,14 @@ func (r *repository) FindOne(ctx context.Context, id int32) (*model.Post, error)
 
 	var ps model.Post
 	err := r.client.QueryRow(ctx, q, id).Scan(&ps.Id, &ps.UserId, &ps.Title, &ps.Body)
+
+	var pgErr *pgconn.PgError
 	if err != nil {
+		if errors.Is(err, pgErr) {
+			pgErr = err.(*pgconn.PgError)
+			sqlErr := fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
+			return nil, sqlErr
+		}
 		return nil, err
 	}
 
