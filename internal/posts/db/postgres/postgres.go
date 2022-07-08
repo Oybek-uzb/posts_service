@@ -88,7 +88,7 @@ func (r *repository) FindAll(ctx context.Context) ([]*model.Post, error) {
 
 func (r *repository) FindOne(ctx context.Context, id int32) (*model.Post, error) {
 	q := `
-		SELECT id, user_id, title, body FROM public.posts WHERE id=$1
+		SELECT id, user_id, title, body FROM public.posts WHERE id=$1 LIMIT 1
 	`
 
 	var ps model.Post
@@ -109,14 +109,18 @@ func (r *repository) FindOne(ctx context.Context, id int32) (*model.Post, error)
 
 func (r *repository) Update(ctx context.Context, post model.Post) (*model.Post, error) {
 	q := `
-		UPDATE public.posts
-		SET user_id = $1, title = $2, body = $3
-		WHERE id = $4
-		RETURNING id, user_id, title, body
+		WITH updated AS (
+			UPDATE public.posts
+			SET user_id = $1, title = $2, body = $3
+			WHERE id = $4
+			RETURNING *)
+		SELECT updated.* FROM updated
+		WHERE id=$4
+		LIMIT 1;
 	`
 
 	var ps model.Post
-	err := r.client.QueryRow(ctx, q, post.UserId, post.Title, post.Body, post.Id).Scan(&ps.Id, &ps.UserId, &ps.Id, &ps.Id)
+	err := r.client.QueryRow(ctx, q, post.UserId, post.Title, post.Body, post.Id).Scan(&ps.Id, &ps.UserId, &ps.Title, &ps.Body)
 
 	var pgErr *pgconn.PgError
 	if err != nil {
@@ -133,16 +137,21 @@ func (r *repository) Update(ctx context.Context, post model.Post) (*model.Post, 
 
 func (r *repository) Delete(ctx context.Context, id int32) (*model.Post, error) {
 	q := `
-		DELETE FROM public.posts
-		WHERE id = $1
-		RETURNING id, user_id, title, body
+		WITH deleted AS (
+    		DELETE FROM public.posts
+    		WHERE id=$1
+    		RETURNING *)
+		SELECT deleted.* FROM deleted
+		WHERE id=$1
+		LIMIT 1;
 	`
 
 	var ps model.Post
-	err := r.client.QueryRow(ctx, q, id).Scan(&ps.Id, &ps.UserId, &ps.Id, &ps.Id)
+	err := r.client.QueryRow(ctx, q, id).Scan(&ps.Id, &ps.UserId, &ps.Title, &ps.Body)
 
 	var pgErr *pgconn.PgError
 	if err != nil {
+		fmt.Println(err)
 		if errors.Is(err, pgErr) {
 			pgErr = err.(*pgconn.PgError)
 			sqlErr := fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())

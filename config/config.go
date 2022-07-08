@@ -1,32 +1,36 @@
 package config
 
 import (
-	"os"
-
 	"github.com/spf13/cast"
+	"os"
 )
 
 type Config struct {
 	PostsServiceHost string
-	PostsServicePort int
 
 	HttpPort string
 
-	Storage StorageConfig `json:"storage"`
+	Storage StorageConfig
 }
 
 type StorageConfig struct {
-	Host     string `json:"host" env-default:"localhost"`
-	Port     string `json:"port" env-default:"5432"`
-	Database string `json:"database" env-default:"posts-service"`
-	Username string `json:"username" env-default:"postgres"`
-	Password string `json:"password" env-default:"postgres"`
+	Host     string
+	Port     string
+	Database string
+	Username string
+	Password string
 }
 
 func Load() Config {
 	config := Config{}
 
 	config.HttpPort = cast.ToString(getOrReturnDefault("HTTP_PORT", ":8082"))
+	config.PostsServiceHost = cast.ToString(getOrReturnDefault("POSTS_SERVICE_HOST", "localhost"))
+	config.Storage.Host = cast.ToString(getOrReturnDefault("STORAGE_HOST", "localhost"))
+	config.Storage.Port = cast.ToString(getOrReturnDefault("STORAGE_PORT", "5432"))
+	config.Storage.Database = cast.ToString(getOrReturnDefault("STORAGE_DATABASE", "postgres"))
+	config.Storage.Username = cast.ToString(getOrReturnDefault("STORAGE_USERNAME", "postgres"))
+	config.Storage.Password = cast.ToString(getOrReturnDefault("STORAGE_PASSWORD", "postgres"))
 
 	return config
 }

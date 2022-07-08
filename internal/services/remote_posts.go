@@ -50,6 +50,7 @@ func (r *remotePostsService) GetRemotePosts(ctx context.Context, req *pbp.GetRem
 
 func fetchPosts(ch chan []*model.Post) {
 	var collectedPosts = make([]*model.Post, 0)
+	var collectedBodies = make([]*model.Body, 0)
 	var mx sync.Mutex
 	var wg sync.WaitGroup
 
@@ -76,17 +77,21 @@ func fetchPosts(ch chan []*model.Post) {
 				return
 			}
 
-			for _, post := range resBody.Data {
-				mx.Lock()
-				collectedPosts = append(collectedPosts, &post)
-				mx.Unlock()
-			}
+			mx.Lock()
+			collectedBodies = append(collectedBodies, &resBody)
+			mx.Unlock()
 		}(i)
 	}
 	wg.Wait()
 
-	for _, fs := range collectedPosts {
-		fmt.Println(fs)
+	for _, cb := range collectedBodies {
+		for _, ps := range cb.Data {
+			collectedPosts = append(collectedPosts, &ps)
+		}
+	}
+
+	for _, cp := range collectedPosts {
+		fmt.Println(cp)
 	}
 
 	ch <- collectedPosts
