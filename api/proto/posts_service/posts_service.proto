@@ -43,3 +43,12 @@ message DeletePostRequest {
 message DeletePostResponse {
   Post deleted_post = 1;
 }
+
+service RemotePostsService {
+  rpc GetRemotePosts(GetRemotePostsRequest) returns (GetRemotePostsResponse) {}
+}
+
+message GetRemotePostsRequest {}
+message GetRemotePostsResponse {
+  repeated Post posts = 1;
+}

@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+
 	cfg := config.Load()
 
 	postgreSQLClient, err := postgres.NewClient(context.TODO(), 3, cfg.Storage)
