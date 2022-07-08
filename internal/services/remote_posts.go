@@ -30,15 +30,16 @@ func (r *remotePostsService) GetRemotePosts(ctx context.Context, req *pbp.GetRem
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(7))
 	defer cancel()
 
-	var remotePostsChan = make(chan []*model.Post)
+	var remotePostsChan = make(chan *[]model.Post)
 
 	go fetchPosts(remotePostsChan)
 
 	remotePosts := <-remotePostsChan
 
-	for _, rs := range remotePosts {
-		err := r.repository.Create(ctx, rs)
+	for _, rs := range *remotePosts {
+		err := r.repository.Create(ctx, &rs)
 		if err != nil {
+
 			return &pbp.GetRemotePostsResponse{IsProcessFinishedSuccessfully: false}, err
 		}
 	}
@@ -48,8 +49,8 @@ func (r *remotePostsService) GetRemotePosts(ctx context.Context, req *pbp.GetRem
 	}, nil
 }
 
-func fetchPosts(ch chan []*model.Post) {
-	var collectedPosts = make([]*model.Post, 0)
+func fetchPosts(ch chan *[]model.Post) {
+	var collectedPosts = make([]model.Post, 0)
 	var collectedBodies = make([]*model.Body, 0)
 	var mx sync.Mutex
 	var wg sync.WaitGroup
@@ -86,13 +87,9 @@ func fetchPosts(ch chan []*model.Post) {
 
 	for _, cb := range collectedBodies {
 		for _, ps := range cb.Data {
-			collectedPosts = append(collectedPosts, &ps)
+			collectedPosts = append(collectedPosts, ps)
 		}
 	}
 
-	for _, cp := range collectedPosts {
-		fmt.Println(cp)
-	}
-
-	ch <- collectedPosts
+	ch <- &collectedPosts
 }
