@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"github.com/Oybek-uzb/posts_service/internal/posts/model"
 	"github.com/Oybek-uzb/posts_service/internal/posts/storage"
 	"time"
@@ -56,8 +55,6 @@ func (s *postsService) GetAllPosts(ctx context.Context, req *pbp.GetAllPostsRequ
 }
 
 func (s *postsService) GetPost(ctx context.Context, req *pbp.GetPostRequest) (*pbp.GetPostResponse, error) {
-	fmt.Println(req)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(7))
 	defer cancel()
 
@@ -85,8 +82,6 @@ func (s *postsService) GetPost(ctx context.Context, req *pbp.GetPostRequest) (*p
 }
 
 func (s *postsService) UpdatePartialPost(ctx context.Context, req *pbp.UpdatePartialPostRequest) (*pbp.UpdatePartialPostResponse, error) {
-	fmt.Println(req)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(7))
 	defer cancel()
 
@@ -120,8 +115,6 @@ func (s *postsService) UpdatePartialPost(ctx context.Context, req *pbp.UpdatePar
 	}, nil
 }
 func (s *postsService) DeletePost(ctx context.Context, req *pbp.DeletePostRequest) (*pbp.DeletePostResponse, error) {
-	fmt.Println(req)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(7))
 	defer cancel()
 
